@@ -1,0 +1,34 @@
+org: acolytec3
+app: avatar-scraper
+service: avatar-star
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+functions:
+  twitter:
+    handler: handler.twitter
+    environment:
+      TWITTER_BEARER_TOKEN: ${env:TWITTER_BEARER_TOKEN}
+    events:
+      - http:
+          path: twitter/{id}
+          method: get
+          request:
+            parameters:
+              paths:
+                id: true 
+  substack:
+    handler: handler.substack
+    events:
+      - http:
+          path: substack/{id}
+          method: get
+          request:
+            parameters:
+              paths:
+                id: true 
+plugins:
+  - serverless-plugin-typescript
