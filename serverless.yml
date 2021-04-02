@@ -1,17 +1,46 @@
 org: acolytec3
 app: avatar-scraper
 service: avatar-star
-useDotenv: true
 
+plugins:
+  - serverless-plugin-typescript
+  - serverless-s3-local
+  - serverless-offline-env
+  - serverless-offline
+  - serverless-prune-plugin
+
+custom:
+  serverless-offline-env:
+    path: .env
+  serverless-offline:
+    noPrependStageInUrl: true
+    noTimeout: true
+    port: 3000
+    host: localhost
+  s3:
+    port: 8000
+    directory: /tmp
+  prune:
+    automatic: true
+    number: 3
+  
 provider:
   name: aws
   runtime: nodejs12.x
-
+  environment: 
+    checkByDate: 10000000
+    imageWidth: 48
+#  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - s3: PutObject
+#        - s3: GetObject
+#          Resource: "arn:aws:s3::${self:custom.bucket}/*"
 functions:
   twitter:
     handler: handler.twitter
     environment:
-      TWITTER_BEARER_TOKEN: ${env:TWITTER_BEARER_TOKEN}
+      twitterBearerToken: ${env:TWITTER_BEARER_TOKEN}
     events:
       - http:
           path: twitter/{id}
@@ -20,6 +49,8 @@ functions:
             parameters:
               paths:
                 id: true 
+      - s3: local-bucket
+
   substack:
     handler: handler.substack
     events:
@@ -30,5 +61,4 @@ functions:
             parameters:
               paths:
                 id: true 
-plugins:
-  - serverless-plugin-typescript
+

@@ -3,14 +3,22 @@
   "description": "",
   "version": "0.1.0",
   "dependencies": {
+    "aws-sdk": "^2.877.0",
     "axios": "^0.21.1",
-    "cheerio": "^1.0.0-rc.5"
+    "cheerio": "^1.0.0-rc.5",
+    "serverless-prune-plugin": "^1.4.4",
+    "sharp": "^0.28.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.61",
     "serverless": "^1.78.1",
     "serverless-offline": "^6.5.0",
+    "serverless-offline-env": "^0.2.0",
     "serverless-plugin-typescript": "^1.1.9",
+    "serverless-s3-local": "^0.6.14",
     "typescript": "^3.9.7"
+  },
+  "scripts": {
+    "local-server": "npx serverless offline start"
   }
 }
