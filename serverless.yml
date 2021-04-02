@@ -30,17 +30,14 @@ provider:
   environment: 
     checkByDate: 10000000
     imageWidth: 48
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - s3: PutObject
-#        - s3: GetObject
-#          Resource: "arn:aws:s3::${self:custom.bucket}/*"
+    s3Endpoint: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
+    s3AccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
+    s3SecretAccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
 functions:
   twitter:
-    handler: handler.twitter
+    handler: handlers/twitter.default
     environment:
-      twitterBearerToken: ${env:TWITTER_BEARER_TOKEN}
+      twitterBearerToken: ${file(env.${opt:stage, self:provider.stage}.json):TWITTER_BEARER_TOKEN}
     events:
       - http:
           path: twitter/{id}
@@ -49,10 +46,9 @@ functions:
             parameters:
               paths:
                 id: true 
-      - s3: local-bucket
 
   substack:
-    handler: handler.substack
+    handler: handlers/substack.default
     events:
       - http:
           path: substack/{id}
