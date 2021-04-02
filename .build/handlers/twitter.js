@@ -57,7 +57,7 @@ var twitter = function (event) { return __awaiter(void 0, void 0, void 0, functi
                 _e.label = 1;
             case 1:
                 _e.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, s3.getObject({ Bucket: 'local-bucket', Key: "twitter/" + event.pathParameters.id }).promise()];
+                return [4 /*yield*/, s3.getObject({ Bucket: process.env.s3Bucket, Key: "twitter/" + event.pathParameters.id }).promise()];
             case 2:
                 s3Image = _e.sent();
                 object = JSON.parse((_b = s3Image === null || s3Image === void 0 ? void 0 : s3Image.Body) === null || _b === void 0 ? void 0 : _b.toString('utf-8'));
@@ -81,7 +81,7 @@ var twitter = function (event) { return __awaiter(void 0, void 0, void 0, functi
                     "user.fields": "profile_image_url"
                 };
                 headers = {
-                    "authorization": "BEARER " + process.env.TWITTER_BEARER_TOKEN
+                    "authorization": "BEARER " + process.env.twitterBearerToken
                 };
                 return [4 /*yield*/, axios_1.default.get('https://api.twitter.com/2/users/by', { params: params, headers: headers })];
             case 5:
@@ -98,7 +98,7 @@ var twitter = function (event) { return __awaiter(void 0, void 0, void 0, functi
             case 7:
                 dataUrl = _e.sent();
                 s3Params = {
-                    Bucket: 'local-bucket',
+                    Bucket: process.env.s3Bucket,
                     Key: "twitter/" + event.pathParameters.id,
                     Body: JSON.stringify({
                         url: dataUrl,

@@ -17,7 +17,7 @@ const twitter: Handler = async (event: any) => {
   }
 
   try {
-    let s3Image = await s3.getObject({ Bucket: 'local-bucket', Key: `twitter/${event.pathParameters.id}` }).promise();
+    let s3Image = await s3.getObject({ Bucket: process.env.s3Bucket, Key: `twitter/${event.pathParameters.id}` }).promise();
     let object = JSON.parse(s3Image?.Body?.toString('utf-8'));
 
     if (object?.lastUpdated && (Date.now() - parseInt(object.lastUpdated)) < parseInt(process.env.checkByDate)) {
@@ -44,7 +44,7 @@ const twitter: Handler = async (event: any) => {
   }
 
   let headers = {
-    "authorization": `BEARER ${process.env.TWITTER_BEARER_TOKEN}`
+    "authorization": `BEARER ${process.env.twitterBearerToken}`
   }
   let res = await axios.get('https://api.twitter.com/2/users/by', { params, headers });
 
@@ -58,7 +58,7 @@ const twitter: Handler = async (event: any) => {
   const dataUrl = await smallerImage(imageData);
 
   const s3Params = {
-    Bucket: 'local-bucket',
+    Bucket: process.env.s3Bucket,
     Key: `twitter/${event.pathParameters.id}`,
     Body: JSON.stringify({
       url: dataUrl,

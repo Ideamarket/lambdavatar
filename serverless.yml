@@ -33,6 +33,8 @@ provider:
     s3Endpoint: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
     s3AccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
     s3SecretAccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
+    s3Bucket: ${file(env.${opt:stage, self:provider.stage}.json):S3BUCKETNAME}
+    
 functions:
   twitter:
     handler: handlers/twitter.default

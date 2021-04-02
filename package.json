@@ -19,6 +19,6 @@
     "typescript": "^3.9.7"
   },
   "scripts": {
-    "local-server": "npx serverless offline start"
+    "local-server": "npx serverless offline --stage offline"
   }
 }

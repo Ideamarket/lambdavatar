@@ -48,9 +48,9 @@ var substack = function (event, context, callback) { return __awaiter(void 0, vo
             case 0:
                 s3 = new aws_sdk_1.S3({
                     s3ForcePathStyle: true,
-                    endpoint: new aws_sdk_1.Endpoint('http://localhost:8000'),
-                    accessKeyId: 'S3RVER',
-                    secretAccessKey: 'S3RVER',
+                    endpoint: new aws_sdk_1.Endpoint(process.env.s3Endpoint),
+                    accessKeyId: process.env.s3AccessKey,
+                    secretAccessKey: process.env.s3SecretAccessKey,
                 });
                 if (!((_a = event === null || event === void 0 ? void 0 : event.pathParameters) === null || _a === void 0 ? void 0 : _a.id)) {
                     return [2 /*return*/, ({ statusCode: 400, statusText: 'No id provided' })];
@@ -58,7 +58,7 @@ var substack = function (event, context, callback) { return __awaiter(void 0, vo
                 _c.label = 1;
             case 1:
                 _c.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, s3.getObject({ Bucket: 'local-bucket', Key: "substack/" + event.pathParameters.id }).promise()];
+                return [4 /*yield*/, s3.getObject({ Bucket: process.env.s3Bucket, Key: "substack/" + event.pathParameters.id }).promise()];
             case 2:
                 s3Image = _c.sent();
                 object = JSON.parse((_b = s3Image === null || s3Image === void 0 ? void 0 : s3Image.Body) === null || _b === void 0 ? void 0 : _b.toString('utf-8'));
@@ -89,7 +89,7 @@ var substack = function (event, context, callback) { return __awaiter(void 0, vo
             case 7:
                 dataUrl = _c.sent();
                 s3Params = {
-                    Bucket: 'local-bucket',
+                    Bucket: process.env.s3Bucket,
                     Key: "substack/" + event.pathParameters.id,
                     Body: JSON.stringify({
                         url: dataUrl,
