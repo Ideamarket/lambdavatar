@@ -19,6 +19,7 @@
     "typescript": "^3.9.7"
   },
   "scripts": {
-    "local-server": "npx serverless offline --stage offline"
+    "local-server": "npx serverless offline --stage offline",
+    "deploy": "npx serverless deploy --stage dev"
   }
 }
