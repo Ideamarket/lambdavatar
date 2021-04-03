@@ -9,9 +9,21 @@ A simple AWS lambda function built with [Serverless SDK](https://serverless.com)
     - Configure any port/server settings as desired
 - Copy `env.example.json` to `env.dev.json` and add your Twitter Bearer Token
 
+## Configuration
 
+In `serverless.yml`
+- `provider:environment:checkByDate` - Time in milliseconds until an avatar should be updated again
+- `provider.environment:imageWidth`  - Pixel width of avatar to be served
 ## Usage
 
+A successful response object for either `/twitter` or `/substack` will return a JSON object of the form:
+```json
+{
+    "image":"data:image/png;base64,iVBORw0KG..."
+}
+```
+
+where `response.image` is the dataURL for the avatar in question.
 
 - For local testing
     - Run `npm run local-server`
