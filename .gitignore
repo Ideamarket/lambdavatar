@@ -8,3 +8,4 @@ jspm_packages
 # environmental variables
 .env
 env.offline.json
+env.dev.json

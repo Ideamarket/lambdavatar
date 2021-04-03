@@ -7,19 +7,20 @@ import { smallerImage } from '../helpers/helpers';
 
 const substack: Handler = async (event: any, context, callback: () => void) => {
 
-  const s3 = new S3({
+  const s3 = process.env.IS_OFFLINE ? new S3({
     s3ForcePathStyle: true,
     endpoint: new Endpoint(process.env.s3Endpoint),
     accessKeyId: process.env.s3AccessKey,
     secretAccessKey: process.env.s3SecretAccessKey,
-  });
+  }) :
+    new S3();
 
   if (!event?.pathParameters?.id) {
     return ({ statusCode: 400, statusText: 'No id provided' })
   }
 
   try {
-    let s3Image = await s3.getObject({ Bucket: process.env.s3Bucket, Key: `substack/${event.pathParameters.id}` }).promise();
+    let s3Image = await s3.getObject({ Bucket: process.env.bucket, Key: `substack/${event.pathParameters.id}` }).promise();
     let object = JSON.parse(s3Image?.Body?.toString('utf-8'));
 
     if (object?.lastUpdated && (Date.now() - parseInt(object.lastUpdated)) < parseInt(process.env.checkByDate)) {
@@ -49,7 +50,7 @@ const substack: Handler = async (event: any, context, callback: () => void) => {
   const dataUrl = await smallerImage(Buffer.from(res.data));
 
   const s3Params = {
-    Bucket: process.env.s3Bucket,
+    Bucket: process.env.bucket,
     Key: `substack/${event.pathParameters.id}`,
     Body: JSON.stringify({
       url: dataUrl,

@@ -23,6 +23,7 @@ custom:
   prune:
     automatic: true
     number: 3
+  bucket: ${file(env.${opt:stage, self:provider.stage}.json):S3BUCKETNAME}
   
 provider:
   name: aws
@@ -33,13 +34,20 @@ provider:
     s3Endpoint: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
     s3AccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
     s3SecretAccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
-    s3Bucket: ${file(env.${opt:stage, self:provider.stage}.json):S3BUCKETNAME}
-    
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - s3:PutObject
+      - s3:GetObject
+    Resource: 
+      - "arn:aws:s3:::${self:custom.bucket}.twitter/*"
+      - "arn:aws:s3:::${self:custom.bucket}.substack/*"
 functions:
   twitter:
     handler: handlers/twitter.default
     environment:
       twitterBearerToken: ${file(env.${opt:stage, self:provider.stage}.json):TWITTER_BEARER_TOKEN}
+      bucket: ${self:custom.bucket}.twitter
     events:
       - http:
           path: twitter/{id}
@@ -48,9 +56,13 @@ functions:
             parameters:
               paths:
                 id: true 
+      - s3:
+          bucket: ${self:custom.bucket}.twitter
 
   substack:
     handler: handlers/substack.default
+    environment:
+      bucket: ${self:custom.bucket}.substack
     events:
       - http:
           path: substack/{id}
@@ -59,4 +71,6 @@ functions:
             parameters:
               paths:
                 id: true 
+      - s3:
+          bucket: ${self:custom.bucket}.substack
 
