@@ -41,10 +41,10 @@ var aws_sdk_1 = require("aws-sdk");
 var cheerio = require("cheerio");
 var helpers_1 = require("../helpers/helpers");
 var substack = function (event, context, callback) { return __awaiter(void 0, void 0, void 0, function () {
-    var s3, s3Image, object, err_1, res, $, profileUrl, dataUrl, s3Params, response;
-    var _a, _b;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
+    var s3, imageUrl, res, $, profileUrl, s3Url, response;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 s3 = process.env.IS_OFFLINE ? new aws_sdk_1.S3({
                     s3ForcePathStyle: true,
@@ -56,54 +56,23 @@ var substack = function (event, context, callback) { return __awaiter(void 0, vo
                 if (!((_a = event === null || event === void 0 ? void 0 : event.pathParameters) === null || _a === void 0 ? void 0 : _a.id)) {
                     return [2 /*return*/, ({ statusCode: 400, statusText: 'No id provided' })];
                 }
-                _c.label = 1;
+                return [4 /*yield*/, helpers_1.getUrlFromS3(s3, "substack/" + event.pathParameters.id)];
             case 1:
-                _c.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, s3.getObject({ Bucket: process.env.bucket, Key: "substack/" + event.pathParameters.id }).promise()];
-            case 2:
-                s3Image = _c.sent();
-                object = JSON.parse((_b = s3Image === null || s3Image === void 0 ? void 0 : s3Image.Body) === null || _b === void 0 ? void 0 : _b.toString('utf-8'));
-                if ((object === null || object === void 0 ? void 0 : object.lastUpdated) && (Date.now() - parseInt(object.lastUpdated)) < parseInt(process.env.checkByDate)) {
-                    if ((object === null || object === void 0 ? void 0 : object.url) && typeof object.url === 'string' && object.url.length > 11) {
-                        return [2 /*return*/, {
-                                statusCode: 200,
-                                body: JSON.stringify({
-                                    image: object.url
-                                }, null, 2),
-                            }];
-                    }
+                imageUrl = _b.sent();
+                if (imageUrl) {
+                    return [2 /*return*/, imageUrl];
                 }
-                return [3 /*break*/, 4];
-            case 3:
-                err_1 = _c.sent();
-                console.log(err_1);
-                return [3 /*break*/, 4];
-            case 4: return [4 /*yield*/, axios_1.default.get("https://" + event.pathParameters.id + ".substack.com")];
-            case 5:
-                res = _c.sent();
+                return [4 /*yield*/, axios_1.default.get("https://" + event.pathParameters.id + ".substack.com")];
+            case 2:
+                res = _b.sent();
                 $ = cheerio.load(res.data);
                 profileUrl = $('link[rel=apple-touch-icon][sizes=120x120]').attr('href');
-                return [4 /*yield*/, axios_1.default.get(profileUrl, { responseType: 'arraybuffer' })];
-            case 6:
-                res = _c.sent();
-                return [4 /*yield*/, helpers_1.smallerImage(Buffer.from(res.data))];
-            case 7:
-                dataUrl = _c.sent();
-                s3Params = {
-                    Bucket: process.env.bucket,
-                    Key: "substack/" + event.pathParameters.id,
-                    Body: JSON.stringify({
-                        url: dataUrl,
-                        lastUpdated: Date.now()
-                    }),
-                    ContentType: 'application/json'
-                };
-                s3.putObject(s3Params).promise();
+                return [4 /*yield*/, helpers_1.putImageOnS3(s3, "substack/" + event.pathParameters.id, profileUrl)];
+            case 3:
+                s3Url = _b.sent();
                 response = {
                     statusCode: 200,
-                    body: JSON.stringify({
-                        image: dataUrl,
-                    }, null, 2),
+                    body: s3Url
                 };
                 return [2 /*return*/, response];
         }

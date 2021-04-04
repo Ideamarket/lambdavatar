@@ -1,7 +1,7 @@
 import { Handler } from 'aws-lambda';
 import axios from 'axios';
 import { S3, Endpoint } from 'aws-sdk';
-import { smallerImage } from '../helpers/helpers';
+import { getUrlFromS3, putImageOnS3 } from '../helpers/helpers';
 
 const twitter: Handler = async (event: any) => {
 
@@ -17,26 +17,9 @@ const twitter: Handler = async (event: any) => {
     return ({ statusCode: 400, statusText: 'No id provided' })
   }
 
-  try {
-    let s3Image = await s3.getObject({ Bucket: process.env.bucket, Key: `twitter/${event.pathParameters.id}` }).promise();
-    let object = JSON.parse(s3Image?.Body?.toString('utf-8'));
-
-    if (object?.lastUpdated && (Date.now() - parseInt(object.lastUpdated)) < parseInt(process.env.checkByDate)) {
-      if (object?.url && typeof object.url === 'string' && object.url.length > 11) {
-        return {
-          statusCode: 200,
-          body: JSON.stringify(
-            {
-              image: object.url
-            },
-            null,
-            2
-          ),
-        };
-      }
-    }
-  }
-  catch (err) {
+  let imageUrl = await getUrlFromS3(s3, `twitter/${event.pathParameters.id}`)
+  if (imageUrl) {
+    return imageUrl
   }
 
   let params = {
@@ -49,37 +32,17 @@ const twitter: Handler = async (event: any) => {
   }
   let res = await axios.get('https://api.twitter.com/2/users/by', { params, headers });
 
-  if (res.data?.errors?.length > 0){
+  if (res.data?.errors?.length > 0) {
     return ({ statusCode: 400, statusText: res.data.errors[0].details })
   }
+
   let profileUrl = res.data.data[0].profile_image_url;
 
-  res = await axios.get(profileUrl, { responseType: 'arraybuffer' });
-  let imageData = Buffer.from(res.data);
-  const dataUrl = await smallerImage(imageData);
-
-  const s3Params = {
-    Bucket: process.env.bucket,
-    Key: `twitter/${event.pathParameters.id}`,
-    Body: JSON.stringify({
-      url: dataUrl,
-      lastUpdated: Date.now()
-    }),
-    ContentType: 'application/json'
-  };
-
-  let putRes = await s3.putObject(s3Params).promise();
-  console.log(putRes);
+  const s3Url = await putImageOnS3(s3, `twitter/${event.pathParameters.id}`, profileUrl);
 
   const response = {
     statusCode: 200,
-    body: JSON.stringify(
-      {
-        image: dataUrl
-      },
-      null,
-      2
-    ),
+    body: s3Url,
   };
 
   return response;

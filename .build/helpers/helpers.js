@@ -36,17 +36,76 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.smallerImage = void 0;
+exports.putImageOnS3 = exports.getUrlFromS3 = exports.smallerImage = void 0;
 var sharp = require("sharp");
+var axios_1 = require("axios");
 exports.smallerImage = function (imageData) { return __awaiter(void 0, void 0, void 0, function () {
-    var smallImage, dataUrl;
+    var smallImage;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, sharp(imageData).resize({ width: parseInt(process.env.imageWidth) }).png().toBuffer()];
             case 1:
                 smallImage = _a.sent();
-                dataUrl = "data:image/png;base64," + smallImage.toString('base64');
-                return [2 /*return*/, dataUrl];
+                return [2 /*return*/, smallImage];
+        }
+    });
+}); };
+exports.getUrlFromS3 = function (bucket, profileId) { return __awaiter(void 0, void 0, void 0, function () {
+    var s3Image, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, bucket.getObject({ Bucket: process.env.bucket, Key: profileId + '.png' }).promise()];
+            case 1:
+                s3Image = _a.sent();
+                // Check to see if cached image was last updated prior to check by date
+                if (s3Image.LastModified && (new Date(Date.now() - parseInt(process.env.checkByDate))) > s3Image.LastModified) {
+                    return [2 /*return*/, null];
+                }
+                if (process.env.IS_OFFLINE) {
+                    return [2 /*return*/, "http://localhost:8000/" + process.env.bucket + "/" + profileId + ".png"];
+                }
+                else {
+                    return [2 /*return*/, "https://s3.amazonaws.com/" + process.env.bucket + "/" + profileId + ".png"];
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_1 = _a.sent();
+                console.log(err_1);
+                return [2 /*return*/, null];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.putImageOnS3 = function (bucket, profileId, profileUrl) { return __awaiter(void 0, void 0, void 0, function () {
+    var res, imageData, smallerImageData, s3Params, putRes;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, axios_1.default.get(profileUrl, { responseType: 'arraybuffer' })];
+            case 1:
+                res = _a.sent();
+                imageData = Buffer.from(res.data);
+                return [4 /*yield*/, exports.smallerImage(imageData)];
+            case 2:
+                smallerImageData = _a.sent();
+                s3Params = {
+                    Bucket: process.env.bucket,
+                    Key: profileId + '.png',
+                    Body: smallerImageData,
+                    ContentType: 'image/png',
+                    ACL: 'public-read'
+                };
+                return [4 /*yield*/, bucket.putObject(s3Params).promise()];
+            case 3:
+                putRes = _a.sent();
+                if (process.env.IS_OFFLINE) {
+                    return [2 /*return*/, "http://localhost:8000/" + process.env.bucket + "/" + profileId + ".png"];
+                }
+                else {
+                    return [2 /*return*/, "https://s3.amazonaws.com/" + process.env.bucket + "/" + profileId + ".png"];
+                }
+                return [2 /*return*/];
         }
     });
 }); };
