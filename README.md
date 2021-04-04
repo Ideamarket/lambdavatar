@@ -16,14 +16,7 @@ In `serverless.yml`
 - `provider.environment:imageWidth`  - Pixel width of avatar to be served
 ## Usage
 
-A successful response object for either `/twitter` or `/substack` will return a JSON object of the form:
-```json
-{
-    "image":"data:image/png;base64,iVBORw0KG..."
-}
-```
-
-where `response.image` is the dataURL for the avatar in question.
+A successful response for either `/twitter` or `/substack` will return a URL to the file stored on S3
 
 - For local testing
     - Run `npm run local-server`
