@@ -19,7 +19,7 @@ const substack: Handler = async (event: any, context, callback: () => void) => {
     return ({ statusCode: 400, statusText: 'No id provided' })
   }
 
-  let imageUrl = await getUrlFromS3(s3, `substack/${event.pathParameters.id}`)
+  const imageUrl = await getUrlFromS3(s3, `substack/${event.pathParameters.id}`)
   if (imageUrl) {
     return imageUrl
   }

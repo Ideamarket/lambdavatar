@@ -39,7 +39,6 @@ provider:
     Action:
       - s3:PutObject
       - s3:GetObject
-      - s3:ListObjects
     Resource: 
       - "arn:aws:s3:::${self:custom.bucket}.twitter/*"
       - "arn:aws:s3:::${self:custom.bucket}.substack/*"

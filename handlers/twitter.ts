@@ -17,26 +17,26 @@ const twitter: Handler = async (event: any) => {
     return ({ statusCode: 400, statusText: 'No id provided' })
   }
 
-  let imageUrl = await getUrlFromS3(s3, `twitter/${event.pathParameters.id}`)
+  const imageUrl = await getUrlFromS3(s3, `twitter/${event.pathParameters.id}`)
   if (imageUrl) {
     return imageUrl
   }
 
-  let params = {
+  const params = {
     usernames: event.pathParameters.id,
     "user.fields": "profile_image_url"
   }
 
-  let headers = {
+  const headers = {
     "authorization": `BEARER ${process.env.twitterBearerToken}`
   }
-  let res = await axios.get('https://api.twitter.com/2/users/by', { params, headers });
+  const res = await axios.get('https://api.twitter.com/2/users/by', { params, headers });
 
   if (res.data?.errors?.length > 0) {
     return ({ statusCode: 400, statusText: res.data.errors[0].details })
   }
 
-  let profileUrl = res.data.data[0].profile_image_url;
+  const profileUrl = res.data.data[0].profile_image_url;
 
   const s3Url = await putImageOnS3(s3, `twitter/${event.pathParameters.id}`, profileUrl);
 

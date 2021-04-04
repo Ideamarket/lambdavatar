@@ -9,6 +9,7 @@ export const smallerImage = async (imageData: Buffer): Promise<Buffer> => {
 
 export const getUrlFromS3 = async (
   bucket: S3, profileId: string): Promise<string | null> => {
+    
   try {
     let s3Image = await bucket.getObject({ Bucket: process.env.bucket, Key: profileId+'.png' }).promise();
 
@@ -32,18 +33,17 @@ export const getUrlFromS3 = async (
 export const putImageOnS3 = async (bucket: S3,
   profileId: string, profileUrl: string): Promise<string> => {
   const res = await axios.get(profileUrl, { responseType: 'arraybuffer' });
-  let imageData = Buffer.from(res.data);
-  const smallerImageData = await smallerImage(imageData);
+  const smallerImageData = await smallerImage(Buffer.from(res.data));
 
+  bucket.putObjectAcl()
   const s3Params = {
     Bucket: process.env.bucket,
     Key: profileId + '.png',
     Body: smallerImageData,
     ContentType: 'image/png',
-    ACL: 'public-read'
   };
 
-  let putRes = await bucket.putObject(s3Params).promise();
+  await bucket.putObject(s3Params).promise();
 
   if (process.env.IS_OFFLINE) {
     return `http://localhost:8000/${process.env.bucket}/${profileId}.png`
