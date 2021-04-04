@@ -21,8 +21,13 @@ const substack: Handler = async (event: any, context, callback: () => void) => {
 
   const imageUrl = await getUrlFromS3(s3, `substack/${event.pathParameters.id}`)
   if (imageUrl) {
-    return imageUrl
+    const response = {
+      statusCode: 200,
+      body: imageUrl,
+    };
+    return response;
   }
+
 
   const res = await axios.get(`https://${event.pathParameters.id}.substack.com`)
   const $ = cheerio.load(res.data)

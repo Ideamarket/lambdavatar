@@ -19,7 +19,11 @@ const twitter: Handler = async (event: any) => {
 
   const imageUrl = await getUrlFromS3(s3, `twitter/${event.pathParameters.id}`)
   if (imageUrl) {
-    return imageUrl
+    const response = {
+      statusCode: 200,
+      body: imageUrl,
+    };
+    return response;
   }
 
   const params = {

@@ -9,12 +9,12 @@ export const smallerImage = async (imageData: Buffer): Promise<Buffer> => {
 
 export const getUrlFromS3 = async (
   bucket: S3, profileId: string): Promise<string | null> => {
-    
+
   try {
     let s3Image = await bucket.getObject({ Bucket: process.env.bucket, Key: profileId+'.png' }).promise();
 
     // Check to see if cached image was last updated prior to check by date
-    if (s3Image.LastModified && (new Date(Date.now() - parseInt(process.env.checkByDate))) > s3Image.LastModified) {
+    if (s3Image.LastModified && (new Date(Date.now() - parseInt(process.env.checkByDate))) > s3Image?.LastModified) {
       return null;
     }
 
