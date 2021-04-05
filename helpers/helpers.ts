@@ -35,12 +35,12 @@ export const putImageOnS3 = async (bucket: S3,
   const res = await axios.get(profileUrl, { responseType: 'arraybuffer' });
   const smallerImageData = await smallerImage(Buffer.from(res.data));
 
-  bucket.putObjectAcl()
   const s3Params = {
     Bucket: process.env.bucket,
     Key: profileId + '.png',
     Body: smallerImageData,
     ContentType: 'image/png',
+    ACL: "public-read"
   };
 
   await bucket.putObject(s3Params).promise();

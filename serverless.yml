@@ -39,6 +39,7 @@ provider:
     Action:
       - s3:PutObject
       - s3:GetObject
+      - s3:PutObjectAcl
     Resource: 
       - "arn:aws:s3:::${self:custom.bucket}.twitter/*"
       - "arn:aws:s3:::${self:custom.bucket}.substack/*"
@@ -48,7 +49,6 @@ functions:
     environment:
       twitterBearerToken: ${file(env.${opt:stage, self:provider.stage}.json):TWITTER_BEARER_TOKEN}
       bucket: ${self:custom.bucket}.twitter
-      bucketKeyTemplate: ${self:custom.bucket}.twitter/twitter/
     events:
       - http:
           path: twitter/{id}
@@ -64,7 +64,6 @@ functions:
     handler: handlers/substack.default
     environment:
       bucket: ${self:custom.bucket}.substack
-      bucketKeyTemplate: ${self:custom.bucket}.substack/substack/
     events:
       - http:
           path: substack/{id}

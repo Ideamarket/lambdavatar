@@ -23,7 +23,8 @@ const substack: Handler = async (event: any, context, callback: () => void) => {
   if (imageUrl) {
     const response = {
       statusCode: 200,
-      body: imageUrl,
+      headers: {"content-type": "application/json"},
+      body: JSON.stringify({ url: imageUrl})
     };
     return response;
   }
@@ -37,7 +38,8 @@ const substack: Handler = async (event: any, context, callback: () => void) => {
  
   const response = {
     statusCode: 200,
-    body: s3Url
+    headers: {"content-type": "application/json"},
+    body: JSON.stringify({ url: s3Url})
   };
 
   return response;

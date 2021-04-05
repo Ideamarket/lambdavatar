@@ -21,7 +21,8 @@ const twitter: Handler = async (event: any) => {
   if (imageUrl) {
     const response = {
       statusCode: 200,
-      body: imageUrl,
+      headers: {"content-type": "application/json"},
+      body: JSON.stringify({ url: imageUrl})
     };
     return response;
   }
@@ -46,7 +47,8 @@ const twitter: Handler = async (event: any) => {
 
   const response = {
     statusCode: 200,
-    body: s3Url,
+    headers: {"content-type": "application/json"},
+    body: JSON.stringify({ url: s3Url})
   };
 
   return response;
