@@ -16,8 +16,12 @@ In `serverless.yml`
 - `provider.environment:imageWidth`  - Pixel width of avatar to be served
 ## Usage
 
-A successful response for either `/twitter` or `/substack` will return a URL to the file stored on S3
-
+A successful response for either `/twitter` or `/substack` will return a URL to the file stored on S3 in a resopnse of the sort:
+```json
+{
+    "url:"s3.amazonaws.com/avatar-star.twitter/..."
+}
+```
 - For local testing
     - Run `npm run local-server`
     - Access localhost:3000/twitter/{id} where {id} is any twitter ID or localhost:3000/substack/{id} where {id} is any substack ID
