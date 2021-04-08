@@ -34,6 +34,8 @@ provider:
     s3Endpoint: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
     s3AccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
     s3SecretAccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
+    twitterBearerToken: ${file(env.${opt:stage, self:provider.stage}.json):TWITTER_BEARER_TOKEN}
+    bucket: ${self:custom.bucket}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -41,36 +43,17 @@ provider:
         - s3:GetObject
         - s3:PutObjectAcl
       Resource:
-        - 'arn:aws:s3:::${self:custom.bucket}.twitter/*'
-        - 'arn:aws:s3:::${self:custom.bucket}.substack/*'
+        - 'arn:aws:s3:::${self:custom.bucket}'
 functions:
-  twitter:
-    handler: handlers/twitter.default
-    environment:
-      twitterBearerToken: ${file(env.${opt:stage, self:provider.stage}.json):TWITTER_BEARER_TOKEN}
-      bucket: ${self:custom.bucket}.twitter
+  main:
+    handler: src/main.default
     events:
       - http:
-          path: twitter/{id}
+          path: /{provider}/{username}
           method: get
           request:
             parameters:
               paths:
                 id: true
       - s3:
-          bucket: ${self:custom.bucket}.twitter
-
-  substack:
-    handler: handlers/substack.default
-    environment:
-      bucket: ${self:custom.bucket}.substack
-    events:
-      - http:
-          path: substack/{id}
-          method: get
-          request:
-            parameters:
-              paths:
-                id: true
-      - s3:
-          bucket: ${self:custom.bucket}.substack
+          bucket: ${self:custom.bucket}

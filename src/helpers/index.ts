@@ -1,8 +1,7 @@
 import * as sharp from 'sharp'
-import axios from 'axios'
 import { S3 } from 'aws-sdk'
 
-export const smallerImage = async (imageData: Buffer): Promise<Buffer> => {
+export async function decreaseImageSize(imageData: Buffer): Promise<Buffer> {
   const smallImage = await sharp(imageData)
     .resize({ width: parseInt(process.env.imageWidth) })
     .png()
@@ -41,15 +40,12 @@ export const getUrlFromS3 = async (
 export const putImageOnS3 = async (
   bucket: S3,
   profileId: string,
-  profileUrl: string
+  image: Buffer
 ): Promise<string> => {
-  const res = await axios.get(profileUrl, { responseType: 'arraybuffer' })
-  const smallerImageData = await smallerImage(Buffer.from(res.data))
-
   const s3Params = {
     Bucket: process.env.bucket,
     Key: profileId + '.png',
-    Body: smallerImageData,
+    Body: image,
     ContentType: 'image/png',
     ACL: 'public-read',
   }
