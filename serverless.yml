@@ -24,25 +24,25 @@ custom:
     automatic: true
     number: 3
   bucket: ${file(env.${opt:stage, self:provider.stage}.json):S3BUCKETNAME}
-  
+
 provider:
   name: aws
   runtime: nodejs12.x
-  environment: 
+  environment:
     checkByDate: 10000000
     imageWidth: 48
     s3Endpoint: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
     s3AccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
     s3SecretAccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
   iamRoleStatements:
-  - Effect: Allow
-    Action:
-      - s3:PutObject
-      - s3:GetObject
-      - s3:PutObjectAcl
-    Resource: 
-      - "arn:aws:s3:::${self:custom.bucket}.twitter/*"
-      - "arn:aws:s3:::${self:custom.bucket}.substack/*"
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:PutObjectAcl
+      Resource:
+        - 'arn:aws:s3:::${self:custom.bucket}.twitter/*'
+        - 'arn:aws:s3:::${self:custom.bucket}.substack/*'
 functions:
   twitter:
     handler: handlers/twitter.default
@@ -56,7 +56,7 @@ functions:
           request:
             parameters:
               paths:
-                id: true 
+                id: true
       - s3:
           bucket: ${self:custom.bucket}.twitter
 
@@ -71,7 +71,6 @@ functions:
           request:
             parameters:
               paths:
-                id: true 
+                id: true
       - s3:
           bucket: ${self:custom.bucket}.substack
-
