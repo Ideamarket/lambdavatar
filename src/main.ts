@@ -3,7 +3,7 @@ import { S3, Endpoint } from 'aws-sdk'
 import {
   fail,
   success,
-  decreaseImageSize,
+  processImage,
   getUrlFromS3,
   putImageOnS3,
 } from './helpers'
@@ -29,6 +29,7 @@ const s3 = process.env.IS_OFFLINE
         - convert jpeg to png
         - fix lint-staged
         - serverless warnings
+        - add showtime provider
 */
 
 const main: Handler = async (event: any) => {
@@ -61,8 +62,7 @@ const main: Handler = async (event: any) => {
     return fail('could not retrieve image from provider')
   }
 
-  image = await decreaseImageSize(image)
-
+  image = await processImage(image)
   s3Url = await putImageOnS3(s3, `${providerName}/${username}`, image)
 
   return success(s3Url)

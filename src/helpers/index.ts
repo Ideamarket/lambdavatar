@@ -1,12 +1,11 @@
 import * as sharp from 'sharp'
 import { S3 } from 'aws-sdk'
 
-export async function decreaseImageSize(imageData: Buffer): Promise<Buffer> {
-  const smallImage = await sharp(imageData)
+export async function processImage(imageData: Buffer): Promise<Buffer> {
+  return await sharp(imageData)
     .resize({ width: parseInt(process.env.IMAGE_WIDTH as any) })
     .png()
     .toBuffer()
-  return smallImage
 }
 
 export async function getUrlFromS3(
