@@ -35,9 +35,13 @@ const main: Handler = async (event: any) => {
     return fail('invalid username')
   }
 
-  let s3Url = await getUrlFromS3(s3, `${providerName}/${username}`)
-  if (s3Url) {
-    return success(s3Url)
+  try {
+    const s3Url = await getUrlFromS3(s3, `${providerName}/${username}`)
+    if (s3Url) {
+      return success(s3Url)
+    }
+  } catch (ex) {
+    return fail('internal error (1)')
   }
 
   // Image does not exist. Try to pull it
@@ -50,9 +54,12 @@ const main: Handler = async (event: any) => {
   }
 
   image = await processImage(image)
-  s3Url = await putImageOnS3(s3, `${providerName}/${username}`, image)
-
-  return success(s3Url)
+  try {
+    const s3Url = await putImageOnS3(s3, `${providerName}/${username}`, image)
+    return success(s3Url)
+  } catch (ex) {
+    return fail('internal error (2)')
+  }
 }
 
 export default main
