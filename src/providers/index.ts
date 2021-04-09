@@ -1,2 +1,9 @@
-export { default as twitter } from './twitter'
-export { default as substack } from './substack'
+import twitter from './twitter'
+import substack from './substack'
+import showtime from './showtime'
+
+export default {
+  twitter,
+  substack,
+  showtime,
+}

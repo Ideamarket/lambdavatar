@@ -1,5 +1,6 @@
 import { Handler } from 'aws-lambda'
 import { S3, Endpoint } from 'aws-sdk'
+
 import {
   fail,
   success,
@@ -7,13 +8,7 @@ import {
   getUrlFromS3,
   putImageOnS3,
 } from './helpers'
-
-import { twitter, substack } from './providers'
-
-const providers = {
-  twitter,
-  substack,
-}
+import providers from './providers'
 
 const s3 = process.env.IS_OFFLINE
   ? new S3({
@@ -23,14 +18,6 @@ const s3 = process.env.IS_OFFLINE
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
     })
   : new S3()
-
-/*
-      TODO
-        - convert jpeg to png
-        - fix lint-staged
-        - serverless warnings
-        - add showtime provider
-*/
 
 const main: Handler = async (event: any) => {
   if (!event || !event.pathParameters) {
