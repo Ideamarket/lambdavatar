@@ -1,6 +1,6 @@
-org: acolytec3
-app: avatar-scraper
-service: avatar-star
+org: ideamarket
+app: lambdavatar
+service: lambdavatar
 
 plugins:
   - serverless-plugin-typescript
