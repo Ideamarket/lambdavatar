@@ -18,9 +18,9 @@ const providers = {
 const s3 = process.env.IS_OFFLINE
   ? new S3({
       s3ForcePathStyle: true,
-      endpoint: new Endpoint(`${process.env.s3Endpoint}`),
-      accessKeyId: process.env.s3AccessKey,
-      secretAccessKey: process.env.s3SecretAccessKey,
+      endpoint: new Endpoint(`${process.env.S3_ENDPOINT}`),
+      accessKeyId: process.env.S3_ACCESS_KEY,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
     })
   : new S3()
 
@@ -31,6 +31,7 @@ const s3 = process.env.IS_OFFLINE
         - convert jpeg to png
         - fix lint-staged
         - check username
+        - serverless warnings
 */
 
 const main: Handler = async (event: any) => {
@@ -56,6 +57,7 @@ const main: Handler = async (event: any) => {
   try {
     image = await provider(username)
   } catch (ex) {
+    console.log(ex)
     return fail('could not retrieve image from provider')
   }
 

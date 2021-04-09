@@ -3,7 +3,7 @@ import { S3 } from 'aws-sdk'
 
 export async function decreaseImageSize(imageData: Buffer): Promise<Buffer> {
   const smallImage = await sharp(imageData)
-    .resize({ width: parseInt(process.env.imageWidth) })
+    .resize({ width: parseInt(process.env.IMAGE_WIDTH) })
     .png()
     .toBuffer()
   return smallImage
@@ -15,22 +15,22 @@ export async function getUrlFromS3(
 ): Promise<string | null> {
   try {
     let s3Image = await bucket
-      .getObject({ Bucket: process.env.bucket, Key: profileId + '.png' })
+      .getObject({ Bucket: process.env.S3_BUCKET, Key: profileId + '.png' })
       .promise()
 
-    // Check to see if cached image was last updated prior to check by date
+    // Check to see if cached image was last updated prior to max age
     if (
       s3Image.LastModified &&
-      new Date(Date.now() - parseInt(process.env.checkByDate)) >
+      new Date(Date.now() - parseInt(process.env.IMAGE_MAX_AGE)) >
         s3Image?.LastModified
     ) {
       return null
     }
 
     if (process.env.IS_OFFLINE) {
-      return `http://localhost:8000/${process.env.bucket}/${profileId}.png`
+      return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
     } else {
-      return `https://s3.amazonaws.com/${process.env.bucket}/${profileId}.png`
+      return `https://s3.amazonaws.com/${process.env.S3_BUCKET}/${profileId}.png`
     }
   } catch (err) {
     return null
@@ -43,7 +43,7 @@ export const putImageOnS3 = async (
   image: Buffer
 ): Promise<string> => {
   const s3Params = {
-    Bucket: process.env.bucket,
+    Bucket: process.env.S3_BUCKET,
     Key: profileId + '.png',
     Body: image,
     ContentType: 'image/png',
@@ -53,9 +53,9 @@ export const putImageOnS3 = async (
   await bucket.putObject(s3Params).promise()
 
   if (process.env.IS_OFFLINE) {
-    return `http://localhost:8000/${process.env.bucket}/${profileId}.png`
+    return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
   } else {
-    return `https://s3.amazonaws.com/${process.env.bucket}/${profileId}.png`
+    return `https://s3.amazonaws.com/${process.env.S3_BUCKET}/${profileId}.png`
   }
 }
 

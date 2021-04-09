@@ -29,13 +29,17 @@ provider:
   name: aws
   runtime: nodejs12.x
   environment:
-    checkByDate: 10000000
-    imageWidth: 48
-    s3Endpoint: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
-    s3AccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
-    s3SecretAccessKey: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
-    twitterBearerToken: ${file(env.${opt:stage, self:provider.stage}.json):TWITTER_BEARER_TOKEN}
-    bucket: ${self:custom.bucket}
+    IMAGE_WIDTH: ${file(env.${opt:stage, self:provider.stage}.json):IMAGE_WIDTH}
+    IMAGE_MAX_AGE: ${file(env.${opt:stage, self:provider.stage}.json):IMAGE_MAX_AGE}
+
+    S3_BUCKET: ${self:custom.bucket}
+    S3_ENDPOINT: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
+    S3_ACCESS_KEY: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
+    S3_SECRET_ACCESS_KEY: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
+
+    PROXY_HOST: ${file(env.${opt:stage, self:provider.stage}.json):PROXY_HOST}
+    PROXY_PORT: ${file(env.${opt:stage, self:provider.stage}.json):PROXY_PORT}
+    PROXY_AUTH: ${file(env.${opt:stage, self:provider.stage}.json):PROXY_AUTH}
   iamRoleStatements:
     - Effect: Allow
       Action:
