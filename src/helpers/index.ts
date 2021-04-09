@@ -3,7 +3,7 @@ import { S3 } from 'aws-sdk'
 
 export async function decreaseImageSize(imageData: Buffer): Promise<Buffer> {
   const smallImage = await sharp(imageData)
-    .resize({ width: parseInt(process.env.IMAGE_WIDTH) })
+    .resize({ width: parseInt(process.env.IMAGE_WIDTH as any) })
     .png()
     .toBuffer()
   return smallImage
@@ -15,13 +15,16 @@ export async function getUrlFromS3(
 ): Promise<string | null> {
   try {
     let s3Image = await bucket
-      .getObject({ Bucket: process.env.S3_BUCKET, Key: profileId + '.png' })
+      .getObject({
+        Bucket: process.env.S3_BUCKET,
+        Key: profileId + '.png',
+      } as any)
       .promise()
 
     // Check to see if cached image was last updated prior to max age
     if (
       s3Image.LastModified &&
-      new Date(Date.now() - parseInt(process.env.IMAGE_MAX_AGE)) >
+      new Date(Date.now() - parseInt(process.env.IMAGE_MAX_AGE as any)) >
         s3Image?.LastModified
     ) {
       return null
@@ -50,7 +53,7 @@ export const putImageOnS3 = async (
     ACL: 'public-read',
   }
 
-  await bucket.putObject(s3Params).promise()
+  await bucket.putObject(s3Params as any).promise()
 
   if (process.env.IS_OFFLINE) {
     return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
