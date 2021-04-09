@@ -26,11 +26,8 @@ const s3 = process.env.IS_OFFLINE
 
 /*
       TODO
-        - replace axios with got
-        - fix twitter with proxy
         - convert jpeg to png
         - fix lint-staged
-        - check username
         - serverless warnings
 */
 
@@ -45,7 +42,10 @@ const main: Handler = async (event: any) => {
     return fail('unknown provider')
   }
 
-  // TODO: Check username
+  // Run a basic sanitycheck on the username
+  if (!/^[a-zA-Z0-9-_]{1,100}$/g.test(username)) {
+    return fail('invalid username')
+  }
 
   let s3Url = await getUrlFromS3(s3, `${providerName}/${username}`)
   if (s3Url) {
