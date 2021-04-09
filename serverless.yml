@@ -28,6 +28,7 @@ custom:
 provider:
   name: aws
   runtime: nodejs12.x
+  region: us-east-1
   environment:
     IMAGE_WIDTH: ${file(env.${opt:stage, self:provider.stage}.json):IMAGE_WIDTH}
     IMAGE_MAX_AGE: ${file(env.${opt:stage, self:provider.stage}.json):IMAGE_MAX_AGE}
