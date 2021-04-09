@@ -9,10 +9,10 @@ export async function decreaseImageSize(imageData: Buffer): Promise<Buffer> {
   return smallImage
 }
 
-export const getUrlFromS3 = async (
+export async function getUrlFromS3(
   bucket: S3,
   profileId: string
-): Promise<string | null> => {
+): Promise<string | null> {
   try {
     let s3Image = await bucket
       .getObject({ Bucket: process.env.bucket, Key: profileId + '.png' })
@@ -56,5 +56,27 @@ export const putImageOnS3 = async (
     return `http://localhost:8000/${process.env.bucket}/${profileId}.png`
   } else {
     return `https://s3.amazonaws.com/${process.env.bucket}/${profileId}.png`
+  }
+}
+
+export function fail(reason: string) {
+  return {
+    statusCode: 400,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      success: false,
+      error: reason,
+    }),
+  }
+}
+
+export function success(url: string) {
+  return {
+    statusCode: 200,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      success: true,
+      url: url,
+    }),
   }
 }
