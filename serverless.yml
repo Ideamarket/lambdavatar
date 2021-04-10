@@ -71,6 +71,7 @@ functions:
       - http:
           path: /{provider}/{username}
           method: get
+          cors: true
 
 resources:
   Resources:
