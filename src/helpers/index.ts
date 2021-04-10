@@ -49,7 +49,6 @@ export const putImageOnS3 = async (
     Key: profileId + '.png',
     Body: image,
     ContentType: 'image/png',
-    ACL: 'public-read',
   }
 
   await bucket.putObject(s3Params as any).promise()

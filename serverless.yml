@@ -78,3 +78,24 @@ functions:
                 id: true
       - s3:
           bucket: ${self:custom.bucket}
+
+resources:
+  Resources:
+    LambdavatarBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket}
+
+    LambdavatarBucketAllowPublicReadPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref LambdavatarBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 's3:GetObject'
+              Resource:
+                - !Join ['/', [!Ref LambdavatarBucket, 'public']]
+              Principal: '*'
