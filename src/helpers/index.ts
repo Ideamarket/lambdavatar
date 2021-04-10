@@ -66,6 +66,7 @@ export function fail(reason: string) {
     headers: {
       'content-type': 'application/json',
       'cache-control': `public, max-age=${process.env.IMAGE_MAX_AGE}`,
+      'access-control-allow-origin': '*',
     },
     body: JSON.stringify({
       success: false,
@@ -80,6 +81,7 @@ export function success(url: string) {
     headers: {
       'content-type': 'application/json',
       'cache-control': `public, max-age=${process.env.IMAGE_MAX_AGE}`,
+      'access-control-allow-origin': '*',
     },
     body: JSON.stringify({
       success: true,
