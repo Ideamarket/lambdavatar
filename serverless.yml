@@ -24,9 +24,6 @@ custom:
     host: localhost
 
   s3:
-    lambdavatarBucket:
-      name: ${self:custom.bucket}
-
     port: 8000
     directory: /tmp
 
@@ -63,7 +60,6 @@ provider:
       Action:
         - s3:PutObject
         - s3:GetObject
-        - s3:PutObjectAcl
       Resource:
         - 'arn:aws:s3:::${self:custom.bucket}'
         - 'arn:aws:s3:::${self:custom.bucket}/*'
@@ -94,5 +90,5 @@ resources:
               Action:
                 - 's3:GetObject'
               Resource:
-                - !Join ['/', [!Ref LambdavatarBucket, 'public']]
+                - 'arn:aws:s3:::${self:custom.bucket}/*'
               Principal: '*'
