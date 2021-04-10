@@ -7,22 +7,33 @@ plugins:
   - serverless-offline-env
   - serverless-offline
   - serverless-prune-plugin
+  - serverless-domain-manager
 
 custom:
   serverless-offline-env:
     path: .env
+
   serverless-offline:
     noPrependStageInUrl: true
     noTimeout: true
     port: 3000
     host: localhost
+
   s3:
     port: 8000
     directory: /tmp
+
   prune:
     automatic: true
     number: 3
+
   bucket: ${file(env.${opt:stage, self:provider.stage}.json):S3BUCKETNAME}
+
+  customDomain:
+    domainName: 'lambdavatar.backend.ideamarket.io'
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
 
 provider:
   name: aws
