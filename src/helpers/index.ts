@@ -64,7 +64,10 @@ export const putImageOnS3 = async (
 export function fail(reason: string) {
   return {
     statusCode: 400,
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': `public, max-age=${process.env.IMAGE_MAX_AGE}`,
+    },
     body: JSON.stringify({
       success: false,
       error: reason,
@@ -75,7 +78,10 @@ export function fail(reason: string) {
 export function success(url: string) {
   return {
     statusCode: 200,
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': `public, max-age=${process.env.IMAGE_MAX_AGE}`,
+    },
     body: JSON.stringify({
       success: true,
       url: url,
