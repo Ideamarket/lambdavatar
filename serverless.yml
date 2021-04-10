@@ -76,8 +76,6 @@ functions:
             parameters:
               paths:
                 id: true
-      - s3:
-          bucket: ${self:custom.bucket}
 
 resources:
   Resources:
