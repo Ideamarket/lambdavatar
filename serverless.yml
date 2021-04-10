@@ -10,6 +10,8 @@ plugins:
   - serverless-domain-manager
 
 custom:
+  stage: ${opt:stage, 'dev'}
+
   serverless-offline-env:
     path: .env
 
@@ -27,30 +29,32 @@ custom:
     automatic: true
     number: 3
 
-  bucket: ${file(env.${opt:stage, self:provider.stage}.json):S3BUCKETNAME}
+  bucket: ${file(env.${self:custom.stage}.json):S3BUCKETNAME}
 
   customDomain:
     domainName: 'lambdavatar.backend.ideamarket.io'
     basePath: ''
-    stage: ${self:provider.stage}
+    stage: ${self:custom.stage}
     createRoute53Record: true
 
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
+
   environment:
-    IMAGE_WIDTH: ${file(env.${opt:stage, self:provider.stage}.json):IMAGE_WIDTH}
-    IMAGE_MAX_AGE: ${file(env.${opt:stage, self:provider.stage}.json):IMAGE_MAX_AGE}
+    IMAGE_WIDTH: ${file(env.${self:custom.stage}.json):IMAGE_WIDTH}
+    IMAGE_MAX_AGE: ${file(env.${self:custom.stage}.json):IMAGE_MAX_AGE}
 
     S3_BUCKET: ${self:custom.bucket}
-    S3_ENDPOINT: ${file(env.${opt:stage, self:provider.stage}.json):S3ENDPOINT}
-    S3_ACCESS_KEY: ${file(env.${opt:stage, self:provider.stage}.json):S3ACCESSKEYID}
-    S3_SECRET_ACCESS_KEY: ${file(env.${opt:stage, self:provider.stage}.json):S3SECRETACCESSKEY}
+    S3_ENDPOINT: ${file(env.${self:custom.stage}.json):S3ENDPOINT}
+    S3_ACCESS_KEY: ${file(env.${self:custom.stage}.json):S3ACCESSKEYID}
+    S3_SECRET_ACCESS_KEY: ${file(env.${self:custom.stage}.json):S3SECRETACCESSKEY}
 
-    PROXY_HOST: ${file(env.${opt:stage, self:provider.stage}.json):PROXY_HOST}
-    PROXY_PORT: ${file(env.${opt:stage, self:provider.stage}.json):PROXY_PORT}
-    PROXY_AUTH: ${file(env.${opt:stage, self:provider.stage}.json):PROXY_AUTH}
+    PROXY_HOST: ${file(env.${self:custom.stage}.json):PROXY_HOST}
+    PROXY_PORT: ${file(env.${self:custom.stage}.json):PROXY_PORT}
+    PROXY_AUTH: ${file(env.${self:custom.stage}.json):PROXY_AUTH}
+
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -60,6 +64,7 @@ provider:
       Resource:
         - 'arn:aws:s3:::${self:custom.bucket}'
         - 'arn:aws:s3:::${self:custom.bucket}/*'
+
 functions:
   main:
     handler: src/main.default
