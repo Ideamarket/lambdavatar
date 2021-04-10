@@ -12,6 +12,8 @@ plugins:
 custom:
   stage: ${opt:stage, 'dev'}
 
+  bucket: ${file(env.${self:custom.stage}.json):S3BUCKETNAME}
+
   serverless-offline-env:
     path: .env
 
@@ -22,14 +24,15 @@ custom:
     host: localhost
 
   s3:
+    lambdavatarBucket:
+      name: ${self:custom.bucket}
+
     port: 8000
     directory: /tmp
 
   prune:
     automatic: true
     number: 3
-
-  bucket: ${file(env.${self:custom.stage}.json):S3BUCKETNAME}
 
   customDomain:
     domainName: 'lambdavatar.backend.ideamarket.io'
