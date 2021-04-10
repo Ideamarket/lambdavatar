@@ -72,10 +72,6 @@ functions:
       - http:
           path: /{provider}/{username}
           method: get
-          request:
-            parameters:
-              paths:
-                id: true
 
 resources:
   Resources:
