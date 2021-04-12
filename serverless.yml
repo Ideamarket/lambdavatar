@@ -14,6 +14,8 @@ custom:
 
   bucket: ${file(env.${self:custom.stage}.json):S3BUCKETNAME}
 
+  deleteDays: ${file(env.${self:custom.stage}.json):DELETE_DAYS}
+
   serverless-offline-env:
     path: .env
 
@@ -80,6 +82,11 @@ resources:
       Properties:
         BucketName: ${self:custom.bucket}
         AccessControl: PublicRead
+        LifecycleConfiguration:
+          Rules:
+            - Id: AutoDeleteRule
+              Status: Enabled
+              ExpirationInDays: '${self:custom.deleteDays}'
         CorsConfiguration:
           CorsRules:
             - AllowedHeaders:
