@@ -48,6 +48,7 @@ export const putImageOnS3 = async (
     Bucket: process.env.S3_BUCKET,
     Key: profileId + '.png',
     Body: image,
+    CacheControl: `public, max-age=${process.env.IMAGE_MAX_AGE}`,
     ContentType: 'image/png',
   }
 
