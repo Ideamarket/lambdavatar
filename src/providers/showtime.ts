@@ -9,12 +9,13 @@ export default async function run(username: string): Promise<any> {
     !res ||
     !res.props ||
     !res.props.pageProps ||
-    !res.props.pageProps.img_url
+    !res.props.pageProps.profile ||
+    !res.props.pageProps.profile.img_url
   ) {
     throw new Error('not found')
   }
 
-  const imageURL = res.props.pageProps.img_url
+  const imageURL = res.props.pageProps.profile.img_url
   const { body: imgBody } = await got(imageURL as string, {
     responseType: 'buffer',
   })
