@@ -31,7 +31,7 @@ const main: Handler = async (event: any) => {
   }
 
   // Run a basic sanitycheck on the username
-  if (!/^[a-zA-Z0-9-_]{1,100}$/g.test(username)) {
+  if (!/^[a-zA-Z0-9-_()]{1,100}$/g.test(username)) {
     return fail('invalid username')
   }
 
