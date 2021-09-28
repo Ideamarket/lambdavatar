@@ -30,9 +30,11 @@ const main: Handler = async (event: any) => {
     return fail('unknown provider')
   }
 
-  // Run a basic sanitycheck on the username
-  if (!/^[a-zA-Z0-9-_()]{1,100}$/g.test(username)) {
-    return fail('invalid username')
+  if (providerName !== 'wikipedia') {
+    // Run a basic sanitycheck on the username
+    if (!/^[a-zA-Z0-9-_()]{1,100}$/g.test(username)) {
+      return fail('invalid username')
+    }
   }
 
   try {
