@@ -32,7 +32,7 @@ export async function getUrlFromS3(
     if (process.env.IS_OFFLINE) {
       return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
     } else {
-      return `https://s3.amazonaws.com/${process.env.S3_BUCKET}/${profileId}.png`
+      return `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${profileId}.png`
     }
   } catch (err) {
     return null
@@ -57,7 +57,7 @@ export const putImageOnS3 = async (
   if (process.env.IS_OFFLINE) {
     return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
   } else {
-    return `https://s3.amazonaws.com/${process.env.S3_BUCKET}/${profileId}.png`
+    return `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${profileId}.png`
   }
 }
 
