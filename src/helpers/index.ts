@@ -49,7 +49,7 @@ export const putImageOnS3 = async (
     Key: profileId + '.png',
     Body: image,
     CacheControl: `public, max-age=${process.env.IMAGE_MAX_AGE}`,
-    ContentType: 'image/png',
+    ContentType: 'image/png;charset=utf-8',
   }
 
   await bucket.putObject(s3Params as any).promise()
