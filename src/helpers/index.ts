@@ -32,7 +32,9 @@ export async function getUrlFromS3(
     if (process.env.IS_OFFLINE) {
       return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
     } else {
-      return `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${profileId}.png`
+      return `https://s3.amazonaws.com/${
+        process.env.S3_BUCKET
+      }/${encodeURIComponent(profileId)}.png`
     }
   } catch (err) {
     return null
