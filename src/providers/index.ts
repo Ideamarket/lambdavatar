@@ -1,4 +1,4 @@
-import twitter from './twitter'
+import twitter from './twitterV2'
 import substack from './substack'
 import showtime from './showtime'
 import twitch from './twitch'
