@@ -11,7 +11,7 @@ export async function processImage(imageData: Buffer): Promise<Buffer> {
 export async function getUrlFromS3(
   bucket: S3,
   profileId: string
-): Promise<string | null> {
+): Promise<object | null> {
   try {
     let s3Image = await bucket
       .getObject({
@@ -20,22 +20,33 @@ export async function getUrlFromS3(
       } as any)
       .promise()
 
+    let result = {
+      url: '',
+      expired: false,
+    }
+
     // Check to see if cached image was last updated prior to max age
     if (
       s3Image.LastModified &&
       new Date(Date.now() - parseInt(process.env.IMAGE_MAX_AGE as any)) >
         s3Image?.LastModified
     ) {
-      return null
+      result.url = `https://s3.amazonaws.com/${
+        process.env.S3_BUCKET
+      }/${encodeURIComponent(profileId)}.png`
+      result.expired = true
+      return result
     }
 
     if (process.env.IS_OFFLINE) {
-      return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
+      result.url = `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
     } else {
-      return `https://s3.amazonaws.com/${
+      result.url = `https://s3.amazonaws.com/${
         process.env.S3_BUCKET
       }/${encodeURIComponent(profileId)}.png`
     }
+
+    return result
   } catch (err) {
     return null
   }

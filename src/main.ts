@@ -37,22 +37,28 @@ const main: Handler = async (event: any) => {
     }
   }
 
+  let s3Ret: any
+
   try {
-    const s3Url = await getUrlFromS3(s3, `${providerName}/${username}`)
-    if (s3Url) {
-      return success(s3Url)
+    s3Ret = await getUrlFromS3(s3, `${providerName}/${username}`)
+    if (s3Ret && !s3Ret.expired) {
+      return success(s3Ret.url)
     }
   } catch (ex) {
-    return fail('internal error (1)')
+    return failedResponse('internal error (1)')
   }
 
   // Image does not exist. Try to pull it
   let image
   try {
     image = await provider(username)
+
+    if (!image) {
+      return failedResponse('could not retrieve image from provider', s3Ret)
+    }
   } catch (ex) {
     console.log(ex)
-    return fail('could not retrieve image from provider')
+    return failedResponse('could not retrieve image from provider', s3Ret)
   }
 
   image = await processImage(image)
@@ -60,8 +66,16 @@ const main: Handler = async (event: any) => {
     const s3Url = await putImageOnS3(s3, `${providerName}/${username}`, image)
     return success(s3Url)
   } catch (ex) {
-    return fail('internal error (2)')
+    return failedResponse('internal error (2)', s3Ret)
   }
+}
+
+const failedResponse = (errorMessage, s3Ret = undefined) => {
+  if (s3Ret && s3Ret.expired) {
+    return success(s3Ret.url)
+  }
+
+  return fail(errorMessage)
 }
 
 export default main

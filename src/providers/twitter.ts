@@ -50,11 +50,20 @@ export default async function run(username: string) {
       agent: proxyAgentConfiguration as any,
     }
   )
-  const rawImageURL = JSON.parse(apiBody).data.user.legacy
-    .profile_image_url_https
-  const imageURL = rawImageURL.replace(/_(?:bigger|mini|normal)\./, `_400x400.`)
 
-  // The final image can be pulled without proxy
-  const { body: imgBody } = await got(imageURL, { responseType: 'buffer' })
-  return imgBody
+  const body = JSON.parse(apiBody)
+
+  if (body.data?.user?.legacy) {
+    const rawImageURL = body.data.user.legacy.profile_image_url_https
+    const imageURL = rawImageURL.replace(
+      /_(?:bigger|mini|normal)\./,
+      `_400x400.`
+    )
+
+    // The final image can be pulled without proxy
+    const { body: imgBody } = await got(imageURL, { responseType: 'buffer' })
+    return imgBody
+  }
+
+  return null
 }
