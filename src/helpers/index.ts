@@ -8,10 +8,10 @@ export async function processImage(imageData: Buffer): Promise<Buffer> {
     .toBuffer()
 }
 
-export async function getUrlFromS3(
+export async function getLambdavatarFromS3(
   bucket: S3,
   profileId: string
-): Promise<string | null> {
+): Promise<Lambdavatar | null> {
   try {
     let s3Image = await bucket
       .getObject({
@@ -20,75 +20,129 @@ export async function getUrlFromS3(
       } as any)
       .promise()
 
+    // return null if nothing is found in S3
+    if (!s3Image) {
+      return null
+    }
+
+    let expired = false
+    let url = ''
     // Check to see if cached image was last updated prior to max age
     if (
       s3Image.LastModified &&
       new Date(Date.now() - parseInt(process.env.IMAGE_MAX_AGE as any)) >
-        s3Image?.LastModified
+        s3Image.LastModified
     ) {
-      return null
+      expired = true
     }
 
     if (process.env.IS_OFFLINE) {
-      return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
+      url = `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
     } else {
-      return `https://s3.amazonaws.com/${
+      url = `https://s3.amazonaws.com/${
         process.env.S3_BUCKET
       }/${encodeURIComponent(profileId)}.png`
     }
-  } catch (err) {
+
+    const lambdavatar: Lambdavatar = { url, expired }
+    return lambdavatar
+  } catch (error) {
+    console.info(error)
     return null
   }
 }
 
-export const putImageOnS3 = async (
+export async function updateLambdavatarInS3(
   bucket: S3,
   profileId: string,
   image: Buffer
-): Promise<string> => {
-  const s3Params = {
-    Bucket: process.env.S3_BUCKET,
-    Key: profileId + '.png',
-    Body: image,
-    CacheControl: `public, max-age=${process.env.IMAGE_MAX_AGE}`,
-    ContentType: 'image/png;charset=utf-8',
-  }
+): Promise<Lambdavatar | null> {
+  try {
+    const s3Params = {
+      Bucket: process.env.S3_BUCKET,
+      Key: profileId + '.png',
+      Body: image,
+      CacheControl: `public, max-age=${process.env.IMAGE_MAX_AGE}`,
+      ContentType: 'image/png;charset=utf-8',
+    }
+    await bucket.putObject(s3Params as any).promise()
 
-  await bucket.putObject(s3Params as any).promise()
+    const expired = false
+    let url = ''
+    if (process.env.IS_OFFLINE) {
+      url = `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
+    } else {
+      url = `https://s3.amazonaws.com/${
+        process.env.S3_BUCKET
+      }/${encodeURIComponent(profileId)}.png`
+    }
 
-  if (process.env.IS_OFFLINE) {
-    return `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
-  } else {
-    return `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${profileId}.png`
-  }
-}
-
-export function fail(reason: string) {
-  return {
-    statusCode: 400,
-    headers: {
-      'content-type': 'application/json',
-      'cache-control': `public, max-age=${process.env.IMAGE_MAX_AGE}`,
-      'access-control-allow-origin': '*',
-    },
-    body: JSON.stringify({
-      success: false,
-      error: reason,
-    }),
+    const lambdavatar: Lambdavatar = { url, expired }
+    return lambdavatar
+  } catch (error) {
+    console.error(error)
+    return null
   }
 }
 
-export function success(url: string) {
-  return {
-    statusCode: 200,
-    headers: {
-      'content-type': 'application/json',
-      'cache-control': `public, max-age=${process.env.IMAGE_MAX_AGE}`,
-      'access-control-allow-origin': '*',
-    },
-    body: JSON.stringify({
-      success: true,
-      url: url,
-    }),
+export function finalResponse({
+  statusCode,
+  message = '',
+  lambdavatar = null,
+}: {
+  statusCode: number
+  message?: string
+  lambdavatar?: Lambdavatar | null
+}) {
+  const headers = {
+    'content-type': 'application/json',
+    'cache-control': `public, max-age=${process.env.IMAGE_MAX_AGE}`,
+    'access-control-allow-origin': '*',
   }
+
+  if (!lambdavatar) {
+    console.error(message)
+    return fail({ statusCode, headers, message })
+  }
+  if (lambdavatar.expired) {
+    console.error('Returning expired lambdavatar')
+  }
+  return success({ statusCode, headers, url: lambdavatar.url })
+}
+
+function fail({
+  statusCode,
+  headers,
+  message,
+}: {
+  statusCode: number
+  headers: any
+  message: string
+}) {
+  return {
+    statusCode,
+    headers,
+    body: JSON.stringify({ success: false, error: message }),
+  }
+}
+
+function success({
+  statusCode,
+  headers,
+  url,
+}: {
+  statusCode: number
+  headers: any
+  url: string
+}) {
+  return {
+    statusCode,
+    headers,
+    body: JSON.stringify({ success: true, url }),
+  }
+}
+
+export type Lambdavatar = {
+  url: string
+  expired: boolean
 }

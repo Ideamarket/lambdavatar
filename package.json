@@ -40,7 +40,8 @@
     "format": "npm run prettier -- --write",
     "check-format": "npm run prettier -- --list-different",
     "validate": "npm-run-all --parallel check-format lint build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "start": "sls offline"
   },
   "lint-staged": {
     "*.+(js|ts|tsx)": [
