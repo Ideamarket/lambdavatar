@@ -2,11 +2,10 @@ import { Handler } from 'aws-lambda'
 import { S3, Endpoint } from 'aws-sdk'
 
 import {
-  fail,
-  success,
   processImage,
-  getUrlFromS3,
-  putImageOnS3,
+  getLambdavatarFromS3,
+  updateLambdavatarInS3,
+  finalResponse,
 } from './helpers'
 import providers from './providers'
 
@@ -21,47 +20,67 @@ const s3 = process.env.IS_OFFLINE
 
 const main: Handler = async (event: any) => {
   if (!event || !event.pathParameters) {
-    return fail('missing request parameters')
+    return finalResponse({
+      statusCode: 400,
+      message: 'Missing request parameters',
+    })
   }
 
   const { provider: providerName, username } = event.pathParameters
-  const provider = providers[providerName]
-  if (!provider) {
-    return fail('unknown provider')
+  const pullLambdavatarImage = providers[providerName]
+  if (!pullLambdavatarImage) {
+    return finalResponse({ statusCode: 400, message: 'Unknown provider' })
   }
 
   if (providerName !== 'wikipedia') {
     // Run a basic sanitycheck on the username
     if (!/^[a-zA-Z0-9-_()]{1,100}$/g.test(username)) {
-      return fail('invalid username')
+      return finalResponse({ statusCode: 400, message: 'Invalid username' })
     }
   }
 
+  // Fetch lambdavatar from S3
+  const lambdavatar = await getLambdavatarFromS3(
+    s3,
+    `${providerName}/${username}`
+  )
+  if (lambdavatar && !lambdavatar.expired) {
+    return finalResponse({ statusCode: 200, lambdavatar })
+  }
+
+  // Lamdavatar in S3 is either expired or does not exist. Try to pull it
+  let lambdavatarImage: Buffer | null | undefined = undefined
   try {
-    const s3Url = await getUrlFromS3(s3, `${providerName}/${username}`)
-    if (s3Url) {
-      return success(s3Url)
+    lambdavatarImage = await pullLambdavatarImage(username)
+  } catch (error) {
+    console.error(error)
+  }
+  if (!lambdavatarImage) {
+    if (lambdavatar) {
+      return finalResponse({ statusCode: 200, lambdavatar })
     }
-  } catch (ex) {
-    return fail('internal error (1)')
+    return finalResponse({
+      statusCode: 500,
+      message: 'Could not retrieve image from provider',
+    })
   }
 
-  // Image does not exist. Try to pull it
-  let image
-  try {
-    image = await provider(username)
-  } catch (ex) {
-    console.log(ex)
-    return fail('could not retrieve image from provider')
+  lambdavatarImage = await processImage(lambdavatarImage)
+  const latestLambdavatar = await updateLambdavatarInS3(
+    s3,
+    `${providerName}/${username}`,
+    lambdavatarImage
+  )
+  if (latestLambdavatar || lambdavatar) {
+    return finalResponse({
+      statusCode: 200,
+      lambdavatar: latestLambdavatar ?? lambdavatar,
+    })
   }
-
-  image = await processImage(image)
-  try {
-    const s3Url = await putImageOnS3(s3, `${providerName}/${username}`, image)
-    return success(s3Url)
-  } catch (ex) {
-    return fail('internal error (2)')
-  }
+  return finalResponse({
+    statusCode: 500,
+    message: 'Could not update latest lambdavatar in S3',
+  })
 }
 
 export default main
