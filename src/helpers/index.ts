@@ -39,9 +39,9 @@ export async function getLambdavatarFromS3(
     if (process.env.IS_OFFLINE) {
       url = `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
     } else {
-      url = `https://s3.amazonaws.com/${
-        process.env.S3_BUCKET
-      }/${encodeURIComponent(profileId)}.png`
+      url = `https://d38ccjc81jdg6l.cloudfront.net/${encodeURIComponent(
+        profileId
+      )}.png`
     }
 
     const lambdavatar: Lambdavatar = { url, expired }
@@ -72,9 +72,9 @@ export async function updateLambdavatarInS3(
     if (process.env.IS_OFFLINE) {
       url = `http://localhost:8000/${process.env.S3_BUCKET}/${profileId}.png`
     } else {
-      url = `https://s3.amazonaws.com/${
-        process.env.S3_BUCKET
-      }/${encodeURIComponent(profileId)}.png`
+      url = `https://d38ccjc81jdg6l.cloudfront.net/${encodeURIComponent(
+        profileId
+      )}.png`
     }
 
     const lambdavatar: Lambdavatar = { url, expired }
