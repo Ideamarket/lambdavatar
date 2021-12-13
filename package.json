@@ -6,6 +6,7 @@
     "aws-sdk": "^2.877.0",
     "cheerio": "^1.0.0-rc.5",
     "got": "^11.8.2",
+    "node-fetch": "2.x",
     "serverless-prune-plugin": "^1.4.4",
     "sharp": "^0.28.0",
     "tunnel": "0.0.6"
@@ -14,6 +15,7 @@
     "@commitlint/cli": "^12.1.1",
     "@commitlint/config-conventional": "^12.1.1",
     "@types/aws-lambda": "^8.10.61",
+    "@types/node-fetch": "2.x",
     "@types/tunnel": "0.0.2",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
