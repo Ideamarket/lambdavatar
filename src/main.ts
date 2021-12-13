@@ -1,5 +1,6 @@
 import { Handler } from 'aws-lambda'
 import { S3, Endpoint } from 'aws-sdk'
+import fetch from 'node-fetch'
 
 import {
   processImage,
@@ -26,10 +27,21 @@ const main: Handler = async (event: any) => {
     })
   }
 
-  const { provider: providerName, username } = event.pathParameters
+  let { provider: providerName, username } = event.pathParameters
   const pullLambdavatarImage = providers[providerName]
   if (!pullLambdavatarImage) {
     return finalResponse({ statusCode: 400, message: 'Unknown provider' })
+  }
+
+  if (providerName === 'wikipedia') {
+    const res = await fetch(
+      `http://localhost:3001/api/markets/wikipedia/validPageTitle?title=${username}`
+    )
+    if (!res.ok) {
+      return finalResponse({ statusCode: 400, message: 'Invalid username' })
+    }
+    const response = await res.json()
+    username = response.data.validPageTitle
   }
 
   if (providerName !== 'wikipedia') {
